@@ -1,0 +1,36 @@
+# --- Web framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# --- Settings / config ---
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# --- Database ---
+motor==3.7.1
+pymongo==4.18.2
+
+# --- File storage (Amazon S3 in production) ---
+boto3==1.35.36
+
+# --- File uploads and document inspection ---
+python-multipart==0.0.12
+pypdf==6.19.0
+# Native PDF text layer for region entity suggestions (text_extraction.py)
+pymupdf==1.28.2
+
+# --- Authentication ---
+# passlib's bcrypt backend detection breaks against bcrypt>=4.1 (a known
+# incompatibility between the two projects), so bcrypt is pinned explicitly
+# here rather than left to whatever "passlib[bcrypt]" would pull in.
+passlib==1.7.4
+bcrypt==4.0.1
+PyJWT==2.9.0
+email-validator==2.2.0
+
+# --- AI region suggestions (Google Gemini) ---
+google-generativeai==0.8.3
+
+# --- Testing ---
+pytest==8.3.3
+httpx==0.27.2

@@ -1,0 +1,28 @@
+# --- secrets / local config ---
+.env
+backend/.env
+frontend/.env
+backend/.env.production
+frontend/.env.production
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# --- Node / frontend build ---
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# --- locally-stored uploaded files (dev only; production uses S3) ---
+storage/local_files/*
+!storage/local_files/.gitkeep
+
+# --- editor / OS noise ---
+.vscode/
+.idea/
+.DS_Store

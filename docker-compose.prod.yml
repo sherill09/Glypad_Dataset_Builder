@@ -1,0 +1,62 @@
+# Runs the WHOLE application for real: PostgreSQL + the backend API +
+# the frontend (served by nginx), all in containers, all talking to each
+# other over Docker's internal network. This is what you run on your
+# server (see DEPLOYMENT.md) — it's different from the plain
+# docker-compose.yml, which only runs Postgres for local development.
+#
+# Start it with:   docker compose -f docker-compose.prod.yml up -d --build
+# View logs with:  docker compose -f docker-compose.prod.yml logs -f
+# Stop it with:     docker compose -f docker-compose.prod.yml down
+# Stop + wipe data: docker compose -f docker-compose.prod.yml down -v
+#
+# Before running this, copy backend/.env.production.example to
+# backend/.env.production and fill in real values — see DEPLOYMENT.md.
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: glypad_mongo_prod
+    restart: unless-stopped
+    volumes:
+      - glypad_mongo_prod_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: glypad_backend_prod
+    restart: unless-stopped
+    env_file:
+      - backend/.env.production
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      # Only used if STORAGE_BACKEND=local in your .env.production. If
+      # you're using S3 (the recommended production setting) this volume
+      # just sits empty and unused — it doesn't hurt anything to leave it.
+      # (The backend's default LOCAL_STORAGE_DIR is "../storage/local_files"
+      # relative to its own working directory, /app — which resolves to
+      # /storage/local_files inside the container.)
+      - glypad_backend_storage:/storage/local_files
+    # Not published to the host either — only nginx (the frontend
+    # container) talks to this directly, over the internal network, at
+    # http://backend:8000. The internet only ever reaches port 80 below.
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: glypad_frontend_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  glypad_mongo_prod_data:
+  glypad_backend_storage:

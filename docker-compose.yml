@@ -1,0 +1,28 @@
+# Runs MongoDB in a container for local development.
+# Start it with:   docker compose up -d
+# Stop it with:     docker compose down
+# Stop + wipe data: docker compose down -v
+#
+# This does NOT run the backend or frontend — those run directly on your
+# machine (see the root README.md) so you can use your normal debugger and
+# get fast reloads while developing. Only the database runs in Docker.
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: glypad_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      # Keeps your data across `docker compose down` / restarts. Only
+      # `docker compose down -v` (note the -v) wipes it.
+      - glypad_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  glypad_mongo_data:
